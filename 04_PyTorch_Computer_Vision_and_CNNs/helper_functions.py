@@ -52,7 +52,7 @@ def plot_decision_boundary(model: torch.nn.Module, X: torch.Tensor, y: torch.Ten
     # Make features
     X_to_pred_on = torch.from_numpy(np.column_stack((xx.ravel(), yy.ravel()))).float()
 
-    # Make predictions
+    # Make predictions 
     model.eval()
     with torch.inference_mode():
         y_logits = model(X_to_pred_on)
