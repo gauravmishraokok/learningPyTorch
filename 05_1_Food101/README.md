@@ -65,7 +65,7 @@
   - **Optimizer reset/ Optimizer Zero Gradient**
   - **Backpropagation**
   - **Optimizer step**
-  - **Testing Function**  to evaluate the model's performance on the test set, calculating both loss and accuracy.
+- **Testing Function**  to evaluate the model's performance on the test set, calculating both loss and accuracy.
 - **Combined Training and Testing function** was created to  iterate over multiple epochs and record performance metrics and **store them in a dictionary per epoch for plotting.**
 
 ## Due to the substantial computational resources required to train a model with *134,674,341 parameters* on the *101,000-images in Food101 dataset*, as indicated by the original research paper's training time of *5 weeks*, this project has reached its conclusion. Due to resource problems, Training the model is not possible. However, the results obtained would closely align with the research paper showing an *accuracy of 92.17%* on an even larger dataset
