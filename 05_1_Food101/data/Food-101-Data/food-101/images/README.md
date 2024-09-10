@@ -1,0 +1,1 @@
+# Like "apple_pie" there were 100 more classes with 1000 images each. They have been removed for pushing to github. Only this folder is kept that too with only 2 images just to give an understanding of file structure
