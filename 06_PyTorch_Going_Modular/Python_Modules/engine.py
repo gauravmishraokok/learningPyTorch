@@ -169,9 +169,9 @@ def train(model: torch.nn.Module,
         print(
           f"Epoch: {epoch+1} | "
           f"train_loss: {train_loss:.4f} | "
-          f"train_acc: {train_acc:.4f} | "
+          f"train_acc: {train_acc*100:.4f} | "
           f"test_loss: {test_loss:.4f} | "
-          f"test_acc: {test_acc:.4f}"
+          f"test_acc: {test_acc*100:.4f}"
         )
 
         # Update results dictionary

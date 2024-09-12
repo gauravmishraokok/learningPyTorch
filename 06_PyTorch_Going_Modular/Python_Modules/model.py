@@ -45,7 +45,7 @@ class TVGGModel(nn.Module):
         self.classifier  = nn.Sequential(
             
             nn.Flatten(),
-            nn.Linear(in_features=hidden_features*59*59,out_features=OUTPUT_FEATURES)
+            nn.Linear(in_features=5776,out_features=OUTPUT_FEATURES)
             
         )
         
