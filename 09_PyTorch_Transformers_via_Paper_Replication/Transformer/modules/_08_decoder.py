@@ -18,7 +18,8 @@ class DecoderBlock(nn.Module):
         self.cross_attention_block = cross_attention_block
         
         # Initialising the residual connections, 3 because we have 3 sublayers
-        self.residual_connections = nn.Module(ResidualConnection(dropout) for _ in range(3))
+        self.residual_connections = nn.ModuleList([ResidualConnection(dropout) for _ in range(3)])
+
         
     
     def forward(self, x, encoder_output, src_mask, tgt_mask):
