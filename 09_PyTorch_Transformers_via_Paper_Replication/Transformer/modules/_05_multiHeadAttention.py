@@ -4,50 +4,6 @@ import torch.nn as nn
 import math
 
 class MultiHeadAttention(nn.Module):
-    """
-    Implementation of Multi-Head Attention of the Transformer model.
-    
-    Attributes:
-        d_model (int)  : The dimension of the input embeddings.
-        h (int)        : The number of attention heads.
-        d_k (int)      : The dimension of each attention head, calculated as d_model // h.
-        w_q (nn.Linear): Linear layer to project input embeddings to query vectors.
-        w_k (nn.Linear): Linear layer to project input embeddings to key vectors.
-        w_v (nn.Linear): Linear layer to project input embeddings to value vectors.
-        w_o (nn.Linear): Linear layer to project concatenated output of all attention heads back to the original embedding dimension.
-        dropout (nn.Dropout): Dropout layer for regularization.
-
-    Methods:
-        __init__(d_model: int, h: int, dropout: float):
-            Initializes the MultiHeadAttention module with the given embedding dimension, number of heads, and dropout rate.
-        
-        attention(query, key, value, mask, dropout: nn.Dropout):
-            Static method that computes the scaled dot-product attention.
-            
-            Args:
-                query (Tensor): Query tensor of shape (Batch, h, Seq_len, d_k).
-                key (Tensor): Key tensor of shape (Batch, h, Seq_len, d_k).
-                value (Tensor): Value tensor of shape (Batch, h, Seq_len, d_k).
-                mask (Tensor): Mask tensor to prevent attention to certain positions.
-                dropout (nn.Dropout): Dropout layer for regularization.
-            
-            Returns:
-                Tensor: The output of the attention mechanism.
-                Tensor: The attention scores.
-        
-        forward(q, k, v, mask):
-            Computes the multi-head attention for the given query, key, and value tensors.
-            
-            Args:
-                q (Tensor): Query tensor of shape (Batch, Seq_len, d_model).
-                k (Tensor): Key tensor of shape (Batch, Seq_len, d_model).
-                v (Tensor): Value tensor of shape (Batch, Seq_len, d_model).
-                mask (Tensor): Mask tensor to prevent attention to certain positions.
-            
-            Returns:
-                Tensor: The output tensor of shape (Batch, Seq_len, d_model).
-                """
-    
     
     def __init__(self,d_model:int,h:int,dropout:float):
         super().__init__()
@@ -98,9 +54,9 @@ class MultiHeadAttention(nn.Module):
         
         #Here query.shape[0] -> Batch & query.shape[1] -> Seq_len
         #Final shape of query after transpose -> (Batch , h , Seq_len , d_k) 
-        query = query.view(query.shape[0] , query.shape[1],self.h,self.d_k).transpose(1,2)
-        key = key.view(key.shape[0] , key.shape[1],self.h,self.d_k).transpose(1,2)
-        value=key.view(value.shape[0] , value.shape[1],self.h,self.d_k).transpose(1,2) 
+        query = query.reshape(query.shape[0], query.shape[1], self.h, self.d_k).transpose(1,2)
+        key = key.reshape(key.shape[0] , key.shape[1],self.h,self.d_k).transpose(1,2)
+        value=key.reshape(value.shape[0] , value.shape[1],self.h,self.d_k).transpose(1,2) 
         
         x,self.attention_score = MultiHeadAttention.attention(query,key,value,mask,self.dropout)
         #Shape of x -> (Batch , h , Seq_len , d_k)
