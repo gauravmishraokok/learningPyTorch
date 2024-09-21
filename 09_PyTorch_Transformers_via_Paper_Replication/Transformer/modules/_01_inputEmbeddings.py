@@ -20,6 +20,7 @@ class InputEmbeddings(nn.Module):
         self.vocab_size = vocab_size #Number of Tokens 
         self.embedding = nn.Embedding(vocab_size,d_model)
         
+        
     def forward(self,x):
         return self.embedding(x)*math.sqrt(self.d_model)
         
