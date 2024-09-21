@@ -7,16 +7,40 @@ from tokenizers.models import WordLevel
 from tokenizers.trainers import WordLevelTrainer
 from tokenizers.pre_tokenizers import Whitespace
 from pathlib import Path
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader, Dataset, random_split, Subset
 from modules._10_transformer import Transformer
 from modules._11_buildTransformer import build_transformer
-from modules._12_bilingualDataset import BilingualDataset, causal_mask
+from modules._12_bilingualDataset import BilingualDataset
 
 def get_all_sentences(ds, lang):
+    """
+    Yields all sentences in the specified language from the dataset.
+
+    Args:
+        ds (Dataset): The dataset containing translation pairs.
+        lang (str): The language code for the desired sentences.
+
+    Yields:
+        str: A sentence in the specified language.
+    """
     for item in ds:
         yield item['translation'][lang]
 
 def get_or_build_tokenizer(config, ds, lang):
+    """
+    Retrieves or builds a tokenizer for the specified language.
+
+    If a tokenizer file exists, it loads the tokenizer from the file.
+    Otherwise, it trains a new tokenizer on the dataset and saves it to a file.
+
+    Args:
+        config (dict): Configuration dictionary containing tokenizer file paths.
+        ds (Dataset): The dataset containing translation pairs.
+        lang (str): The language code for the tokenizer.
+
+    Returns:
+        Tokenizer: The tokenizer for the specified language.
+    """
     tokenizer_path = Path(config['tokenizer_file'].format(lang))
     
     if not tokenizer_path.exists():
@@ -32,7 +56,18 @@ def get_or_build_tokenizer(config, ds, lang):
     return tokenizer
 
 def get_ds(config):
-    ds_raw = load_dataset('cfilt/iitb-english-hindi', f"{config['lang_src']}-{config['lang_tgt']}", split="train")
+    """
+    Loads the dataset, builds tokenizers, and splits the dataset into training and testing sets.
+
+    Args:
+        config (dict): Configuration dictionary containing dataset and tokenizer parameters.
+
+    Returns:
+        tuple: A tuple containing the training DataLoader, testing DataLoader, source tokenizer, and target tokenizer.
+    """
+    torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
+    ds_raw = load_dataset('cfilt/iitb-english-hindi', 'default', split="train[:1%]")
     
     # Building the tokenizers
     tokenizer_src = get_or_build_tokenizer(config, ds_raw, config["lang_src"])
@@ -41,7 +76,8 @@ def get_ds(config):
     # Splitting the training and testing data into 80% & 20% split
     train_ds_size = int(0.8 * len(ds_raw))
     test_ds_size = len(ds_raw) - train_ds_size
-    
+    torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
     train_ds_raw, test_ds_raw = random_split(ds_raw, [train_ds_size, test_ds_size])
     
     train_ds = BilingualDataset(ds=train_ds_raw, tokenizer_src=tokenizer_src, tokenizer_tgt=tokenizer_tgt, src_lang=config["lang_src"], tgt_lang=config["lang_tgt"], seq_len=config["seq_len"])
@@ -62,8 +98,18 @@ def get_ds(config):
     
     return train_dataloader, test_dataloader , tokenizer_src, tokenizer_tgt
 
-
 def get_model(config, vocab_src_len, vocab_tgt_len):
-    model = build_transformer(src_vocab_size=vocab_src_len, tgt_vocab_size=vocab_tgt_len, src_seq_len=config["seq_len"], tgt_seq_len=config["seq_len"], d_model=config["d_model"], N=config["N"], h=config["h"])
+    """
+    Builds and returns the transformer model.
+
+    Args:
+        config (dict): Configuration dictionary containing model parameters.
+        vocab_src_len (int): The size of the source vocabulary.
+        vocab_tgt_len (int): The size of the target vocabulary.
+
+    Returns:
+        nn.Module: The transformer model.
+    """
+    model = build_transformer(src_vocab_size=vocab_src_len, tgt_vocab_size=vocab_tgt_len, src_seq_len=config["seq_len"], tgt_seq_len=config["seq_len"], d_model=config["d_model"])
     
     return model
