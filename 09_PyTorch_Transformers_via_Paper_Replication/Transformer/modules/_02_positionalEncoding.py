@@ -36,6 +36,7 @@ class PositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
     
     def forward(self, x):
+        
         # Input tokens  --> Input tokens  + Position of the respective tokens
         x = x + self.pe[:, :x.shape[1], :].requires_grad_(False)
         
