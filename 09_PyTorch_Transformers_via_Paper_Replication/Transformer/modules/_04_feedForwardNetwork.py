@@ -26,5 +26,4 @@ class FeedForwardNetwork(nn.Module):
         
     def forward(self, x): 
         #(Batch_len , Seq_len , d_model) -> (Batch_len , Seq_len , d_ff) ->(Batch_len , Seq_len , d_model) 
-        
         return self.linear_2(self.dropout(torch.relu(self.linear_1(x)))) 
