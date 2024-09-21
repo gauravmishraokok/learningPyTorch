@@ -11,8 +11,6 @@ class LayerNormalization(nn.Module):
     
     def __init__(self, eps:float = 10**-6):
         
-        
-        
         super().__init__()
         
         #Epsilon is a small value added for numerical stability and also to avoid division by 0
