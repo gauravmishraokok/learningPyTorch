@@ -1,15 +1,35 @@
-
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader 
 
-def causal_mask(self, size):
-        mask = torch.triu(torch.ones(size, size), diagonal=1).type(torch.int)
-        return mask == 0 
-
 class BilingualDataset(Dataset):
+    """
+    A custom Dataset class for bilingual translation tasks.
+
+    Attributes:
+        ds (list): The dataset containing source and target language pairs.
+        tokenizer_src (Tokenizer): Tokenizer for the source language.
+        tokenizer_tgt (Tokenizer): Tokenizer for the target language.
+        src_lang (str): Source language code.
+        tgt_lang (str): Target language code.
+        seq_len (int): The sequence length for padding/truncating.
+        sos_token (torch.Tensor): Start of sequence token for the target language.
+        eos_token (torch.Tensor): End of sequence token for the target language.
+        pad_token (torch.Tensor): Padding token for the target language.
+    """
     
     def __init__(self, ds, tokenizer_src, tokenizer_tgt, src_lang, tgt_lang , seq_len ):
+        """
+        Initializes the BilingualDataset.
+
+        Args:
+            ds (list): The dataset containing source and target language pairs.
+            tokenizer_src (Tokenizer): Tokenizer for the source language.
+            tokenizer_tgt (Tokenizer): Tokenizer for the target language.
+            src_lang (str): Source language code.
+            tgt_lang (str): Target language code.
+            seq_len (int): The sequence length for padding/truncating.
+        """
         super().__init__()
 
         self.ds = ds
@@ -24,11 +44,37 @@ class BilingualDataset(Dataset):
         self.pad_token = torch.tensor([tokenizer_tgt.token_to_id("[PAD]")], dtype=torch.long)
         
     def __len__(self):
+        """
+        Returns the length of the dataset.
+
+        Returns:
+            int: The number of samples in the dataset.
+        """
         return len(self.ds)
     
+    def causal_mask(self, size):
+        """
+        Creates a causal mask for the decoder.
+
+        Args:
+            size (int): The size of the mask.
+
+        Returns:
+            torch.Tensor: A causal mask of shape (size, size).
+        """
+        mask = torch.triu(torch.ones(size, size), diagonal=1).type(torch.int)
+        return mask == 0
     
     def __getitem__(self, index):
-        
+        """
+        Retrieves a sample from the dataset at the given index.
+
+        Args:
+            index (int): The index of the sample to retrieve.
+
+        Returns:
+            dict: A dictionary containing the encoder input, decoder input, masks, label, source text, and target text.
+        """
         # Getting the source and target sentences together and then splitting them
         src_tgt_pair = self.ds[index]
         src_text = src_tgt_pair['translation'][self.src_lang]
@@ -80,10 +126,8 @@ class BilingualDataset(Dataset):
             "encoder_input": encoder_input,  # (seq_len)
             "decoder_input": decoder_input,  # (seq_len)
             "encoder_mask": (encoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).long(),  # (1,1,seq_len)
-            "decoder_mask": (decoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).long() & causal_mask(decoder_input.size(0)),  # (1,1,seq_len)
+            "decoder_mask": (decoder_input != self.pad_token).unsqueeze(0).unsqueeze(0).long() & self.causal_mask(decoder_input.size(0)),# (1,1,seq_len)
             "label": label, #(seq_len)
-            "src_text":src_text,
-            "tgt_text" : tgt_text
+            "src_text": src_text,
+            "tgt_text": tgt_text
         }
-        
-        
