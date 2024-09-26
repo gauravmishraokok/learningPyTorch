@@ -62,9 +62,6 @@ X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_siz
 train_dataset = HandwrittenDataset(X_train, y_train, transform=transformation)
 test_dataset = HandwrittenDataset(X_test, y_test, transform=transformation)
 
-# Define batch size
-BATCH_SIZE = 64  # Adjust as necessary
-
 # Create dataloaders
 train_dataloader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_dataloader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
