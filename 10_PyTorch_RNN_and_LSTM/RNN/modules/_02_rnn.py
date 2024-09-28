@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
-
-from modules.utils import *
+from tqdm import tqdm as tqdm
+from modules._01_utils import *
 
 class RNN(nn.Module):
     
@@ -35,11 +35,7 @@ class RNN(nn.Module):
 category_lines, all_categories = load_data()
 num_categories = len(all_categories)
 
-rnn_model = RNN(input_size=N_LETTERS, hidden_size=128, output_size=num_categories)
-
-input_tensor = line_to_tensor('Emanuel')
-hidden_tensor = rnn_model.init_hidden()
-output , next_hidden = rnn_model(input_tensor[0], hidden_tensor)
+rnn_model = RNN(input_size=N_LETTERS, hidden_size=256, output_size=num_categories)
 
 
 def category_from_output(output):
@@ -51,7 +47,11 @@ def category_from_output(output):
 #Training part -> 
 
 loss_fn = torch.nn.NLLLoss()
-optimizer = torch.optim.SGD(params=rnn_model.parameters(), lr = 0.03)
+
+# Create the Adam optimizer
+optimizer = torch.optim.RMSprop(rnn_model.parameters(), 0.0005 )
+
+
 
 def train(line_tensor, category_tensor):
     hidden = rnn_model.init_hidden()
@@ -68,28 +68,35 @@ def train(line_tensor, category_tensor):
 
 current_loss = 0
 all_loss_values = []
-plot_steps , print_steps = 1000, 5000
-n_iterations = 100000
+plot_steps , print_steps = 500 , 10000 
+n_iterations = 50000 
 
-for i in range(n_iterations):
-    category , line , category_tensor, tesnsor, line_tensor = random_training_example(category_lines=category_lines, all_categories=all_categories)
+
+for i in tqdm(range(n_iterations)):
+    category , line , category_tensor, line_tensor = random_training_example(category_lines=category_lines, all_categories=all_categories)
     
     output , loss = train(line_tensor=line_tensor, category_tensor=category_tensor)
     
     current_loss+= loss
     
+    if (i+1) % plot_steps == 0:
+        all_loss_values.append(current_loss / plot_steps)
+        current_loss = 0
+        
     if (i+1) % print_steps == 0:
         guess = category_from_output(output)
         correct = "CORRECT" if guess == category else f"WRONG ({category})"
         print(f"{i+1} {(i+1)/n_iterations*100} {loss:.4f} {line} / {guess} {correct}")
-        
     
 
+
+#Plotting the loss values
 plt.figure()
 plt.plot(all_loss_values)
 plt.show()
 
 
+#Predicting on Custom Input Data
 def predict(input_line):
     print(f"\n> {input_line}")
     with torch.no_grad():
