@@ -8,14 +8,23 @@ from Modules._01_config import *
 from Modules._02_patchEmbedding import PatchEmbedding
 from Modules._03_ViT import ViT
 from Modules._04_dataset import train_dataloader, test_dataloader, class_names
-from Modules._05_training import model
-
-torch.cuda.empty_cache()
+from pathlib import Path
 
 labels = []
 ids = []
 imgs = []
+
+# Load the trained model
+model_folder = Path("weights")
+model_path = model_folder / f"ViT_{EPOCHS}_epochs.pth"
+
+if not model_path.exists():
+    raise FileNotFoundError(f"Model file not found: {model_path}")
+
+model = torch.load(model_path)
+model = model.to(device)
 model.eval()
+
 with torch.inference_mode():
     for batch, (X,y) in enumerate(tqdm.tqdm(test_dataloader, position=0, leave=True)):
         X=X.to(device)
