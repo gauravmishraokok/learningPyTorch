@@ -6,6 +6,7 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
+from Modules._01_config import *
 
 # Define the path and read the data
 data_path = Path("data")
@@ -27,7 +28,8 @@ y_tensor = torch.tensor(y_values, dtype=torch.int64)
 transformation = transforms.Compose([
     transforms.ToPILImage(),  
     transforms.Resize((28, 28)), 
-    transforms.ToTensor()
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.5], std=[0.5])
 ])
 
 # Custom dataset class
@@ -56,12 +58,13 @@ class HandwrittenDataset(Dataset):
 class_names = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'] 
 
 # Split the data
-X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X_tensor, y_tensor, test_size=0.2, random_state=8888)
 
 # Create dataset objects
 train_dataset = HandwrittenDataset(X_train, y_train, transform=transformation)
 test_dataset = HandwrittenDataset(X_test, y_test, transform=transformation)
 
+BATCH_SIZE=16
 # Create dataloaders
 train_dataloader = DataLoader(dataset=train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_dataloader = DataLoader(dataset=test_dataset, batch_size=BATCH_SIZE, shuffle=False)
